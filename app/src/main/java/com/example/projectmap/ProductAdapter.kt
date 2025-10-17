@@ -1,4 +1,4 @@
-package com.example.projectmap // <-- GANTI DENGAN NAMA PACKAGE ANDA
+package com.example.projectmap // <-- PASTIKAN NAMA PACKAGE INI SESUAI DENGAN PROYEK ANDA
 
 import android.view.LayoutInflater
 import android.view.View
@@ -7,11 +7,12 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
-// Pastikan nama kelasnya sudah benar: ProductAdapter
-class ProductAdapter(private val productList: List<Product>) :
-    RecyclerView.Adapter<ProductAdapter.ProductViewHolder>() {
+// MODIFIKASI BARU: Tambahkan parameter onClickListener
+class ProductAdapter(
+    private val productList: List<Product>,
+    private val onClickListener: (Product) -> Unit // Fungsi lambda untuk menangani klik
+) : RecyclerView.Adapter<ProductAdapter.ProductViewHolder>() {
 
-    // Pastikan nama inner classnya benar: ProductViewHolder
     class ProductViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val imageView: ImageView = itemView.findViewById(R.id.iv_product_image)
         val nameView: TextView = itemView.findViewById(R.id.tv_product_name)
@@ -29,8 +30,12 @@ class ProductAdapter(private val productList: List<Product>) :
 
         holder.imageView.setImageResource(currentProduct.imageResId)
         holder.nameView.text = currentProduct.name
-        // Pastikan format harga sudah benar
         holder.priceView.text = "Rp ${String.format("%,.0f", currentProduct.price)}"
+
+        // MODIFIKASI BARU: Set OnClickListener untuk seluruh item View
+        holder.itemView.setOnClickListener {
+            onClickListener(currentProduct) // Panggil fungsi yang diterima dari konstruktor
+        }
     }
 
     override fun getItemCount(): Int {
