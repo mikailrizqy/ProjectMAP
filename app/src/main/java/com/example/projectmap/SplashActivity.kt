@@ -20,11 +20,15 @@ class SplashActivity : AppCompatActivity() {
 
         // Handler untuk menjalankan kode setelah waktu tunda
         Handler(Looper.getMainLooper()).postDelayed({
-            // Pindah ke MainActivity
-            val intent = Intent(this, MainActivity::class.java)
-            startActivity(intent)
+            val prefs = getSharedPreferences("UserPrefs", MODE_PRIVATE)
+            val username = prefs.getString("username", null)
 
-            // Tutup SplashActivity agar tidak bisa kembali ke layar ini
+            if (username != null) {
+                startActivity(Intent(this, MainActivity::class.java))
+            } else {
+                startActivity(Intent(this, LoginActivity::class.java))
+            }
+
             finish()
         }, SPLASH_DELAY)
     }

@@ -1,8 +1,5 @@
-package com.example.projectmap // <-- GANTI DENGAN NAMA PACKAGE ANDA
+package com.example.projectmap
 
-import com.example.projectmap.R
-import com.example.projectmap.Product
-import com.example.projectmap.ProductAdapter
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Button
@@ -11,6 +8,9 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import org.json.JSONArray
+import org.json.JSONObject
+
 
 class DetailProductActivity : AppCompatActivity() {
 
@@ -47,20 +47,47 @@ class DetailProductActivity : AppCompatActivity() {
         // Mengatur judul toolbar sesuai nama produk
         supportActionBar?.title = productName
 
-        // Listener untuk tombol "Tambah ke Keranjang"
-        btnAddToCart.setOnClickListener {
-            Toast.makeText(this, "${productName} ditambahkan ke keranjang!", Toast.LENGTH_SHORT).show()
-        }
-
         // Listener untuk placeholder fitur kamera
         btnUploadImagePlaceholder.setOnClickListener {
             Toast.makeText(this, "Simulasi membuka kamera/galeri untuk ${productName}", Toast.LENGTH_SHORT).show()
+        }
+
+        // Listener untuk tombol "Tambah ke Keranjang"
+        btnAddToCart.setOnClickListener {
+            addToCart(
+                Product(
+                    id = productId,
+                    name = productName ?: "Produk",
+                    price = productPrice,
+                    description = productDescription ?: "",
+                    imageResId = productImageResId
+                )
+            )
+            Toast.makeText(this, "$productName ditambahkan ke keranjang!", Toast.LENGTH_SHORT).show()
         }
 
         // RecyclerView untuk Rekomendasi ML (dengan data dummy)
         val rvMlRecommendations: RecyclerView = findViewById(R.id.rv_ml_recommendations)
         rvMlRecommendations.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
         rvMlRecommendations.adapter = ProductAdapter(getDummyRecommendationData()) { /* Tidak melakukan apa-apa saat item rekomendasi diklik */ }
+    }
+
+
+    private fun addToCart(product: Product) {
+        val sharedPref = getSharedPreferences("CartData", MODE_PRIVATE)
+        val jsonString = sharedPref.getString("cart", "[]")
+        val jsonArray = JSONArray(jsonString)
+
+        val newItem = JSONObject().apply {
+            put("id", product.id)
+            put("name", product.name)
+            put("price", product.price)
+            put("description", product.description)
+            put("imageResId", product.imageResId)
+        }
+
+        jsonArray.put(newItem)
+        sharedPref.edit().putString("cart", jsonArray.toString()).apply()
     }
 
     // Fungsi untuk membuat data rekomendasi dummy
