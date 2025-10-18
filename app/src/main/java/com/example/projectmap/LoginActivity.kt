@@ -8,6 +8,7 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
 
+
 class LoginActivity : AppCompatActivity() {
 
     private lateinit var prefs: SharedPreferences
@@ -30,12 +31,23 @@ class LoginActivity : AppCompatActivity() {
             val savedUsername = prefs.getString("username", null)
             val savedPassword = prefs.getString("password", null)
 
-            if (username == savedUsername && password == savedPassword) {
-                Toast.makeText(this, "Login berhasil!", Toast.LENGTH_SHORT).show()
-                startActivity(Intent(this, MainActivity::class.java))
+            // === LOGIKA UNTUK MASUK KE HALAMAN ADMIN ===
+            if (username == "admin" && password == "admin123") { // Contoh kredensial admin
+                Toast.makeText(this, "Login Berhasil sebagai Admin!", Toast.LENGTH_SHORT).show()
+                val intent = Intent(this, AdminActivity::class.java) // Pindah ke AdminActivity
+                startActivity(intent)
+                finish() // Menutup LoginActivity agar tidak bisa kembali dengan tombol back
+            }
+            // === LOGIKA UNTUK MASUK KE HALAMAN UTAMA (USER BIASA) ===
+            else if (username == "user" && password == "user123") { // Contoh kredensial user biasa
+                Toast.makeText(this, "Login Berhasil sebagai Pengguna!", Toast.LENGTH_SHORT).show()
+                val intent = Intent(this, MainActivity::class.java) // Pindah ke MainActivity
+                startActivity(intent)
                 finish()
-            } else {
-                Toast.makeText(this, "Username atau password salah!", Toast.LENGTH_SHORT).show()
+            }
+            // === LOGIKA JIKA GAGAL LOGIN ===
+            else {
+                Toast.makeText(this, "Username atau Password salah.", Toast.LENGTH_SHORT).show()
             }
         }
 

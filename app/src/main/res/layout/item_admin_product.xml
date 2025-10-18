@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="8dp"
+    app:cardCornerRadius="8dp"
+    app:cardElevation="4dp">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="16dp">
+
+        <ImageView
+            android:id="@+id/iv_admin_product_image"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:scaleType="centerCrop"
+            android:src="@drawable/ic_launcher_background"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/tv_admin_product_name"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="8dp"
+            android:text="Nama Produk Admin"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:textColor="@android:color/black"
+            app:layout_constraintEnd_toStartOf="@id/btn_edit_product"
+            app:layout_constraintStart_toEndOf="@id/iv_admin_product_image"
+            app:layout_constraintTop_toTopOf="@id/iv_admin_product_image" />
+
+        <TextView
+            android:id="@+id/tv_admin_product_price"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="4dp"
+            android:layout_marginEnd="8dp"
+            android:text="Rp 0.0"
+            android:textSize="16sp"
+            android:textColor="@android:color/holo_green_dark"
+            app:layout_constraintEnd_toStartOf="@id/btn_delete_product"
+            app:layout_constraintStart_toEndOf="@id/iv_admin_product_image"
+            app:layout_constraintTop_toBottomOf="@id/tv_admin_product_name" />
+
+        <ImageButton
+            android:id="@+id/btn_edit_product"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Edit Produk"
+            android:src="@android:drawable/ic_menu_edit"
+            app:layout_constraintEnd_toStartOf="@id/btn_delete_product"
+            app:layout_constraintTop_toTopOf="@id/iv_admin_product_image"
+            app:tint="?attr/colorPrimary" />
+
+        <ImageButton
+            android:id="@+id/btn_delete_product"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Hapus Produk"
+            android:src="@android:drawable/ic_menu_delete"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@id/iv_admin_product_image"
+            app:tint="@android:color/holo_red_light" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.cardview.widget.CardView>
