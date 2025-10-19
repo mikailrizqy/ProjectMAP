@@ -6,6 +6,11 @@
         android:title="Edit" />
 
     <item
+        android:id="@+id/nav_admin_orders"
+        android:icon="@drawable/ic_orders_24"
+        android:title="Pesanan" />
+
+    <item
         android:id="@+id/menu_dashboard"
         android:icon="@drawable/outline_leaderboard_24"
         android:title="Dashboard" />

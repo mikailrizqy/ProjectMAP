@@ -1,8 +1,9 @@
-package com.example.projectmap
+package com.example.projectmap // <-- PASTIKAN NAMA PACKAGE INI SESUAI DENGAN PROYEK ANDA
 
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.View // Import View
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -22,6 +23,7 @@ class AdminActivity : AppCompatActivity() {
     private lateinit var bottomNavigation: BottomNavigationView
     private lateinit var rvAdminProducts: RecyclerView
     private lateinit var fabAddProduct: FloatingActionButton
+    private lateinit var toolbar: androidx.appcompat.widget.Toolbar // Deklarasi toolbar
 
     private val addEditProductLauncher: ActivityResultLauncher<Intent> =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -40,9 +42,8 @@ class AdminActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_admin)
 
-        val toolbar: androidx.appcompat.widget.Toolbar = findViewById(R.id.toolbar_admin)
+        toolbar = findViewById(R.id.toolbar_admin)
         setSupportActionBar(toolbar)
-        supportActionBar?.title = "Manajemen Produk (Admin)"
 
         // Inisialisasi komponen
         rvAdminProducts = findViewById(R.id.rv_admin_products)
@@ -53,12 +54,23 @@ class AdminActivity : AppCompatActivity() {
         setupBottomNavigation()
 
         // Load default fragment (Edit/Product Management)
-        showProductManagement()
+        if (savedInstanceState == null) { // Hanya saat pertama kali dibuka
+            bottomNavigation.selectedItemId = R.id.menu_edit // Set default ke tab "Edit"
+        }
 
         // Handle tombol back device
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
-                finish()
+                val currentFragment = supportFragmentManager.findFragmentById(R.id.fragment_container)
+
+                // Perbaiki typo di sini: EmptyFragmen
+                if (currentFragment != null && currentFragment !is EmptyFragment) {
+                    // Jika sedang di fragment lain, kembali ke Produk (Edit)
+                    bottomNavigation.selectedItemId = R.id.menu_edit
+                } else {
+                    // Jika sudah di Produk, keluar
+                    finish()
+                }
             }
         })
     }
@@ -67,15 +79,19 @@ class AdminActivity : AppCompatActivity() {
     private fun setupBottomNavigation() {
         bottomNavigation.setOnItemSelectedListener { item ->
             when (item.itemId) {
-                R.id.menu_edit -> {
+                R.id.menu_edit -> { // ID dari menu.xml
                     showProductManagement()
                     true
                 }
-                R.id.menu_dashboard -> {
+                R.id.nav_admin_orders -> { // ID BARU DITAMBAHKAN
+                    showOrdersAdminFragment() // Panggil fungsi baru
+                    true
+                }
+                R.id.menu_dashboard -> { // ID dari menu.xml
                     showDashboardFragment()
                     true
                 }
-                R.id.menu_account -> {
+                R.id.menu_account -> { // ID dari menu.xml
                     showAccountFragment()
                     true
                 }
@@ -88,26 +104,30 @@ class AdminActivity : AppCompatActivity() {
         supportActionBar?.title = "Manajemen Produk (Admin)"
 
         // Tampilkan RecyclerView dan FAB
-        rvAdminProducts.visibility = RecyclerView.VISIBLE
-        fabAddProduct.visibility = FloatingActionButton.VISIBLE
+        rvAdminProducts.visibility = View.VISIBLE
+        fabAddProduct.visibility = View.VISIBLE
 
         // Setup RecyclerView
         rvAdminProducts.layoutManager = LinearLayoutManager(this)
         productList = getDummyProductData().toMutableList()
 
-        adminProductAdapter = AdminProductAdapter(
-            productList,
-            onEditClickListener = { product ->
-                val intent = Intent(this, AddEditProductActivity::class.java).apply {
-                    putExtra("PRODUCT_EDIT", product)
+        if (!::adminProductAdapter.isInitialized) { // Cek jika adapter belum dibuat
+            adminProductAdapter = AdminProductAdapter(
+                productList,
+                onEditClickListener = { product ->
+                    val intent = Intent(this, AddEditProductActivity::class.java).apply {
+                        putExtra("PRODUCT_EDIT", product)
+                    }
+                    addEditProductLauncher.launch(intent)
+                },
+                onDeleteClickListener = { product ->
+                    showDeleteConfirmationDialog(product)
                 }
-                addEditProductLauncher.launch(intent)
-            },
-            onDeleteClickListener = { product ->
-                showDeleteConfirmationDialog(product)
-            }
-        )
-        rvAdminProducts.adapter = adminProductAdapter
+            )
+            rvAdminProducts.adapter = adminProductAdapter
+        } else {
+            adminProductAdapter.updateData(productList) // Jika sudah ada, update datanya
+        }
 
         // Setup FAB
         fabAddProduct.setOnClickListener {
@@ -115,39 +135,54 @@ class AdminActivity : AppCompatActivity() {
             addEditProductLauncher.launch(intent)
         }
 
-        // Sembunyikan fragment container
-        supportFragmentManager.beginTransaction()
-            .replace(R.id.fragment_container, EmptyFragment())
-            .commit()
+        // Sembunyikan fragment container dengan memuat EmptyFragmen
+        // Perbaiki typo di sini: EmptyFragmen
+        loadFragment(EmptyFragment())
     }
+
+    // FUNGSI BARU UNTUK ORDERS
+    private fun showOrdersAdminFragment() {
+        supportActionBar?.title = "Daftar Pesanan"
+
+        // Sembunyikan RecyclerView dan FAB
+        rvAdminProducts.visibility = View.GONE
+        fabAddProduct.visibility = View.GONE
+
+        // Tampilkan fragment OrdersAdminFragment
+        loadFragment(OrdersAdminFragment()) // Gunakan nama kelas yang benar
+    }
+
 
     private fun showDashboardFragment() {
         supportActionBar?.title = "Dashboard Penjualan"
 
         // Sembunyikan RecyclerView dan FAB
-        rvAdminProducts.visibility = RecyclerView.GONE
-        fabAddProduct.visibility = FloatingActionButton.GONE
+        rvAdminProducts.visibility = View.GONE
+        fabAddProduct.visibility = View.GONE
 
         // Tampilkan fragment dashboard
-        val dashboardFragment = DashboardFragment()
-        supportFragmentManager.beginTransaction()
-            .replace(R.id.fragment_container, dashboardFragment)
-            .commit()
+        loadFragment(DashboardFragment()) // Gunakan nama kelas yang benar
     }
 
     private fun showAccountFragment() {
         supportActionBar?.title = "Profil Toko"
 
         // Sembunyikan RecyclerView dan FAB
-        rvAdminProducts.visibility = RecyclerView.GONE
-        fabAddProduct.visibility = FloatingActionButton.GONE
+        rvAdminProducts.visibility = View.GONE
+        fabAddProduct.visibility = View.GONE
 
         // Tampilkan fragment account
-        val accountFragment = AccountFragment()
+        loadFragment(AccountFragment()) // Gunakan nama kelas yang benar
+    }
+
+    // Fungsi helper untuk memuat fragment
+    private fun loadFragment(fragment: Fragment) {
         supportFragmentManager.beginTransaction()
-            .replace(R.id.fragment_container, accountFragment)
+            .replace(R.id.fragment_container, fragment) // Pastikan R.id.fragment_container ada di activity_admin.xml
             .commit()
     }
+
+    // ... (Fungsi showDeleteConfirmationDialog dan getDummyProductData tetap sama) ...
 
     private fun showDeleteConfirmationDialog(product: Product) {
         AlertDialog.Builder(this)

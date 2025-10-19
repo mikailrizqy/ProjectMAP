@@ -13,6 +13,6 @@ class EmptyFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         // Return null untuk fragment kosong
-        return null
+        return inflater.inflate(R.layout.fragment_empty, container, false)
     }
 }
