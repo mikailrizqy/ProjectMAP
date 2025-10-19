@@ -16,4 +16,6 @@
     <color name="gold">#FFC107</color>
     <color name="dark_gray">#9E9E9E</color>
     <color name="darker_gray">#AAAAAA</color>
+    <color name="red_light">#FFEBEE</color>
+    <color name="orange">#FF9800</color>
 </resources>

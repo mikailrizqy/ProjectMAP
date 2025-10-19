@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/menu_home"
+        android:icon="@drawable/outline_home_24"
+        android:title="Home" />
+
+    <item
+        android:id="@+id/menu_notifications"
+        android:icon="@drawable/outline_notifications_unread_24"
+        android:title="Notifications" />
+
+    <item
+        android:id="@+id/menu_transactions"
+        android:icon="@drawable/outline_clinical_notes_24"
+        android:title="Transaksi" />
+
+    <item
+        android:id="@+id/menu_account"
+        android:icon="@drawable/outline_account_circle_24"
+        android:title="Akun" />
+</menu>

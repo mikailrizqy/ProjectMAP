@@ -7,8 +7,10 @@ import android.text.TextWatcher
 import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.Toast
+import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.bottomnavigation.BottomNavigationView
 
 class MainActivity : AppCompatActivity() {
 
@@ -16,6 +18,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var rvProducts: RecyclerView
     private lateinit var etSearch: EditText
     private lateinit var cartButton: ImageButton
+    private lateinit var bottomNavigation: BottomNavigationView
 
     private val originalProductList = mutableListOf<Product>()
     private val filteredProductList = mutableListOf<Product>()
@@ -33,8 +36,12 @@ class MainActivity : AppCompatActivity() {
         etSearch = findViewById(R.id.et_search)
         cartButton = findViewById(R.id.cart_button)
         rvProducts = findViewById(R.id.rv_products)
+        bottomNavigation = findViewById(R.id.bottom_navigation)
 
-        // Setup RecyclerView
+        // Setup Bottom Navigation
+        setupBottomNavigation()
+
+        // Setup RecyclerView untuk Home
         rvProducts.layoutManager = LinearLayoutManager(this)
 
         // Get product data
@@ -67,6 +74,49 @@ class MainActivity : AppCompatActivity() {
             startActivity(intent)
             Toast.makeText(this, "Membuka keranjang", Toast.LENGTH_SHORT).show()
         }
+    }
+
+    private fun setupBottomNavigation() {
+        bottomNavigation.setOnItemSelectedListener { item ->
+            when (item.itemId) {
+                R.id.menu_home -> {
+                    showHome()
+                    true
+                }
+                R.id.menu_notifications -> {
+                    showFragment(NotificationsFragment())
+                    true
+                }
+                R.id.menu_transactions -> {
+                    showFragment(TransactionsFragment())
+                    true
+                }
+                R.id.menu_account -> {
+                    showFragment(AccountFragmentMain())
+                    true
+                }
+                else -> false
+            }
+        }
+
+        // Set default selected item
+        bottomNavigation.selectedItemId = R.id.menu_home
+    }
+
+    private fun showHome() {
+        // Tampilkan RecyclerView dan sembunyikan fragment
+        rvProducts.visibility = RecyclerView.VISIBLE
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.fragment_container, Fragment()) // Empty fragment
+            .commit()
+    }
+
+    private fun showFragment(fragment: Fragment) {
+        // Sembunyikan RecyclerView dan tampilkan fragment
+        rvProducts.visibility = RecyclerView.GONE
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.fragment_container, fragment)
+            .commit()
     }
 
     private fun setupSearch() {
