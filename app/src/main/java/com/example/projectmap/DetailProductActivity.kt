@@ -11,7 +11,6 @@ import androidx.recyclerview.widget.RecyclerView
 import org.json.JSONArray
 import org.json.JSONObject
 
-
 class DetailProductActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -37,7 +36,9 @@ class DetailProductActivity : AppCompatActivity() {
         val tvDetailPrice: TextView = findViewById(R.id.tv_detail_price)
         val tvDetailDescription: TextView = findViewById(R.id.tv_detail_description)
         val btnAddToCart: Button = findViewById(R.id.btn_add_to_cart)
-        val btnUploadImagePlaceholder: Button = findViewById(R.id.btn_upload_image_placeholder)
+
+        // HAPUS BARIS INI karena tombol sudah tidak ada di layout
+        // val btnUploadImagePlaceholder: Button = findViewById(R.id.btn_upload_image_placeholder)
 
         ivDetailImage.setImageResource(productImageResId)
         tvDetailName.text = productName
@@ -47,10 +48,10 @@ class DetailProductActivity : AppCompatActivity() {
         // Mengatur judul toolbar sesuai nama produk
         supportActionBar?.title = productName
 
-        // Listener untuk placeholder fitur kamera
-        btnUploadImagePlaceholder.setOnClickListener {
-            Toast.makeText(this, "Simulasi membuka kamera/galeri untuk ${productName}", Toast.LENGTH_SHORT).show()
-        }
+        // HAPUS listener untuk btnUploadImagePlaceholder karena tombol sudah tidak ada
+        // btnUploadImagePlaceholder.setOnClickListener {
+        //     Toast.makeText(this, "Simulasi membuka kamera/galeri untuk ${productName}", Toast.LENGTH_SHORT).show()
+        // }
 
         // Listener untuk tombol "Tambah ke Keranjang"
         btnAddToCart.setOnClickListener {
@@ -72,7 +73,6 @@ class DetailProductActivity : AppCompatActivity() {
         rvMlRecommendations.adapter = ProductAdapter(getDummyRecommendationData()) { /* Tidak melakukan apa-apa saat item rekomendasi diklik */ }
     }
 
-
     private fun addToCart(product: Product) {
         val sharedPref = getSharedPreferences("CartData", MODE_PRIVATE)
         val jsonString = sharedPref.getString("cart", "[]")
@@ -90,7 +90,7 @@ class DetailProductActivity : AppCompatActivity() {
         sharedPref.edit().putString("cart", jsonArray.toString()).apply()
     }
 
-    // Fungsi untuk membuat data rekomendasi dummy
+    // Fungsi untuk membuat data rekomendasi dummy - TIDAK DIUBAH
     private fun getDummyRecommendationData(): List<Product> {
         // Ini bisa diisi dengan beberapa produk dummy lain atau produk yang sudah ada
         // Untuk demo UTS, kita bisa hardcode saja

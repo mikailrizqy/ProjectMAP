@@ -9,7 +9,7 @@ import androidx.recyclerview.widget.RecyclerView
 
 // MODIFIKASI BARU: Tambahkan parameter onClickListener
 class ProductAdapter(
-    private val productList: List<Product>,
+    private var productList: List<Product>, // Ubah ke var agar bisa di-update
     private val onClickListener: (Product) -> Unit // Fungsi lambda untuk menangani klik
 ) : RecyclerView.Adapter<ProductAdapter.ProductViewHolder>() {
 
@@ -40,5 +40,13 @@ class ProductAdapter(
 
     override fun getItemCount(): Int {
         return productList.size
+    }
+
+    // FUNGSI BARU: Untuk update data saat search
+    fun updateData(newProductList: List<Product>) {
+        // Ganti referensi list dengan data baru
+        productList = newProductList
+        // Notifikasi adapter bahwa data berubah
+        notifyDataSetChanged()
     }
 }

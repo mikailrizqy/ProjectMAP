@@ -1,31 +1,34 @@
-package com.example.projectmap // <-- PASTIKAN NAMA PACKAGE INI SESUAI DENGAN PROYEK ANDA
+package com.example.projectmap
 
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import androidx.appcompat.app.AlertDialog
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
-import android.app.Activity // Pastikan ini juga ada
+import android.app.Activity
+import androidx.fragment.app.Fragment
 
 class AdminActivity : AppCompatActivity() {
 
     private lateinit var adminProductAdapter: AdminProductAdapter
-    private var productList: MutableList<Product> = mutableListOf() // Daftar produk yang bisa dimodifikasi
+    private var productList: MutableList<Product> = mutableListOf()
+    private lateinit var bottomNavigation: BottomNavigationView
+    private lateinit var rvAdminProducts: RecyclerView
+    private lateinit var fabAddProduct: FloatingActionButton
 
     private val addEditProductLauncher: ActivityResultLauncher<Intent> =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == Activity.RESULT_OK) {
-                // Jika ada perubahan, refresh daftar produk
                 result.data?.getBooleanExtra("PRODUCT_MODIFIED", false)?.let { modified ->
                     if (modified) {
-                        // Untuk sekarang, kita hanya akan me-refresh dari data dummy
-                        // Di implementasi nyata, Anda akan memuat ulang dari database
-                        productList = getDummyProductData().toMutableList() // Re-load data dummy
+                        productList = getDummyProductData().toMutableList()
                         adminProductAdapter.updateData(productList)
                         Toast.makeText(this, "Daftar produk diperbarui.", Toast.LENGTH_SHORT).show()
                     }
@@ -39,53 +42,120 @@ class AdminActivity : AppCompatActivity() {
 
         val toolbar: androidx.appcompat.widget.Toolbar = findViewById(R.id.toolbar_admin)
         setSupportActionBar(toolbar)
-        supportActionBar?.setDisplayHomeAsUpEnabled(true) // Tombol kembali di toolbar
         supportActionBar?.title = "Manajemen Produk (Admin)"
 
-        // Inisialisasi RecyclerView
-        val rvAdminProducts: RecyclerView = findViewById(R.id.rv_admin_products)
+        // Inisialisasi komponen
+        rvAdminProducts = findViewById(R.id.rv_admin_products)
+        fabAddProduct = findViewById(R.id.fab_add_product)
+        bottomNavigation = findViewById(R.id.bottom_navigation)
+
+        // Setup Bottom Navigation
+        setupBottomNavigation()
+
+        // Load default fragment (Edit/Product Management)
+        showProductManagement()
+
+        // Handle tombol back device
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                finish()
+            }
+        })
+    }
+
+    // Setup Bottom Navigation
+    private fun setupBottomNavigation() {
+        bottomNavigation.setOnItemSelectedListener { item ->
+            when (item.itemId) {
+                R.id.menu_edit -> {
+                    showProductManagement()
+                    true
+                }
+                R.id.menu_dashboard -> {
+                    showDashboardFragment()
+                    true
+                }
+                R.id.menu_account -> {
+                    showAccountFragment()
+                    true
+                }
+                else -> false
+            }
+        }
+    }
+
+    private fun showProductManagement() {
+        supportActionBar?.title = "Manajemen Produk (Admin)"
+
+        // Tampilkan RecyclerView dan FAB
+        rvAdminProducts.visibility = RecyclerView.VISIBLE
+        fabAddProduct.visibility = FloatingActionButton.VISIBLE
+
+        // Setup RecyclerView
         rvAdminProducts.layoutManager = LinearLayoutManager(this)
+        productList = getDummyProductData().toMutableList()
 
-        // Dapatkan data produk (saat ini dari MainActivity, nanti bisa dari database)
-        productList = getDummyProductData().toMutableList() // Pastikan ini mutable
-
-        // Inisialisasi AdminProductAdapter
         adminProductAdapter = AdminProductAdapter(
             productList,
             onEditClickListener = { product ->
-                // === BAGIAN YANG DIKOREKSI (onEditClickListener) ===
                 val intent = Intent(this, AddEditProductActivity::class.java).apply {
-                    putExtra("PRODUCT_EDIT", product) // Kirim objek produk untuk diedit
+                    putExtra("PRODUCT_EDIT", product)
                 }
-                addEditProductLauncher.launch(intent) // Memanggil AddEditProductActivity
-                // ===================================================
+                addEditProductLauncher.launch(intent)
             },
             onDeleteClickListener = { product ->
-                // Aksi saat tombol Delete diklik
                 showDeleteConfirmationDialog(product)
             }
         )
         rvAdminProducts.adapter = adminProductAdapter
 
-        // Mengatur FloatingActionButton (FAB) untuk menambah produk
-        val fabAddProduct: FloatingActionButton = findViewById(R.id.fab_add_product)
+        // Setup FAB
         fabAddProduct.setOnClickListener {
-            // === BAGIAN YANG DIKOREKSI (fabAddProduct) ===
             val intent = Intent(this, AddEditProductActivity::class.java)
-            addEditProductLauncher.launch(intent) // Memanggil AddEditProductActivity
-            // =============================================
+            addEditProductLauncher.launch(intent)
         }
+
+        // Sembunyikan fragment container
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.fragment_container, EmptyFragment())
+            .commit()
     }
 
-    // Fungsi untuk menampilkan dialog konfirmasi hapus
+    private fun showDashboardFragment() {
+        supportActionBar?.title = "Dashboard Penjualan"
+
+        // Sembunyikan RecyclerView dan FAB
+        rvAdminProducts.visibility = RecyclerView.GONE
+        fabAddProduct.visibility = FloatingActionButton.GONE
+
+        // Tampilkan fragment dashboard
+        val dashboardFragment = DashboardFragment()
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.fragment_container, dashboardFragment)
+            .commit()
+    }
+
+    private fun showAccountFragment() {
+        supportActionBar?.title = "Profil Toko"
+
+        // Sembunyikan RecyclerView dan FAB
+        rvAdminProducts.visibility = RecyclerView.GONE
+        fabAddProduct.visibility = FloatingActionButton.GONE
+
+        // Tampilkan fragment account
+        val accountFragment = AccountFragment()
+        supportFragmentManager.beginTransaction()
+            .replace(R.id.fragment_container, accountFragment)
+            .commit()
+    }
+
     private fun showDeleteConfirmationDialog(product: Product) {
         AlertDialog.Builder(this)
             .setTitle("Hapus Produk")
             .setMessage("Apakah Anda yakin ingin menghapus produk '${product.name}'?")
             .setPositiveButton("Hapus") { dialog, which ->
-                // Logika untuk menghapus produk dari daftar
                 productList.remove(product)
-                adminProductAdapter.updateData(productList) // Perbarui adapter
+                adminProductAdapter.updateData(productList)
                 Toast.makeText(this, "${product.name} berhasil dihapus!", Toast.LENGTH_SHORT).show()
             }
             .setNegativeButton("Batal") { dialog, which ->
@@ -94,10 +164,7 @@ class AdminActivity : AppCompatActivity() {
             .show()
     }
 
-    // Mengambil data dummy (bisa sama dengan MainActivity atau dari sumber lain)
     private fun getDummyProductData(): List<Product> {
-        // Untuk saat ini, kita bisa menggunakan data dummy yang sama dari MainActivity
-        // Nantinya, data ini bisa diambil dari database atau Shared Preferences
         return listOf(
             Product(
                 id = 1,
@@ -112,8 +179,7 @@ class AdminActivity : AppCompatActivity() {
                 price = 25000000.0,
                 description = "Traktor mini handal dan efisien untuk membajak sawah dan mengolah lahan. Dilengkapi fitur modern untuk kemudahan operasional.",
                 imageResId = R.drawable.traktor_mini
-            )
-            ,
+            ),
             Product(
                 id = 3,
                 name = "Semprotan Hama Elektrik",
@@ -129,11 +195,5 @@ class AdminActivity : AppCompatActivity() {
                 imageResId = R.drawable.sekop_tangan
             )
         )
-    }
-
-    // Fungsi untuk tombol kembali di toolbar
-    override fun onSupportNavigateUp(): Boolean {
-        onBackPressedDispatcher.onBackPressed()
-        return true
     }
 }

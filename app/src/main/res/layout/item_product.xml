@@ -18,7 +18,8 @@
             android:layout_width="80dp"
             android:layout_height="80dp"
             android:scaleType="centerCrop"
-            android:src="@drawable/ic_launcher_background" app:layout_constraintStart_toStartOf="parent"
+            android:src="@drawable/ic_launcher_background"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
@@ -27,12 +28,44 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             android:text="Nama Produk"
+            android:textColor="@android:color/black"
             android:textSize="18sp"
             android:textStyle="bold"
-            android:textColor="@android:color/black"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@id/iv_product_image"
             app:layout_constraintTop_toTopOf="@id/iv_product_image" />
+
+        <!-- Rating Container -->
+        <LinearLayout
+            android:id="@+id/rating_container"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="4dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            app:layout_constraintStart_toEndOf="@id/iv_product_image"
+            app:layout_constraintTop_toBottomOf="@id/tv_product_name">
+
+            <!-- Icon Bintang -->
+            <ImageView
+                android:id="@+id/iv_star_icon"
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:layout_marginEnd="4dp"
+                android:src="@drawable/baseline_star_rate_24"
+                android:tint="@color/yellow" />
+
+            <!-- Angka Rating -->
+            <TextView
+                android:id="@+id/tv_rating"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="4.7"
+                android:textColor="@android:color/black"
+                android:textSize="14sp" />
+
+        </LinearLayout>
 
         <TextView
             android:id="@+id/tv_product_price"
@@ -41,11 +74,24 @@
             android:layout_marginStart="16dp"
             android:layout_marginTop="4dp"
             android:text="Rp 0.0"
-            android:textSize="16sp"
             android:textColor="@android:color/holo_green_dark"
-            app:layout_constraintEnd_toEndOf="parent"
+            android:textSize="16sp"
+            app:layout_constraintEnd_toStartOf="@+id/tv_sold_count"
             app:layout_constraintStart_toEndOf="@id/iv_product_image"
-            app:layout_constraintTop_toBottomOf="@id/tv_product_name" />
+            app:layout_constraintTop_toBottomOf="@id/rating_container" />
+
+        <!-- Total Terjual -->
+        <TextView
+            android:id="@+id/tv_sold_count"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:text="25 Terjual"
+            android:textColor="@android:color/darker_gray"
+            android:textSize="14sp"
+            app:layout_constraintBottom_toBottomOf="@id/tv_product_price"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@id/tv_product_price" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

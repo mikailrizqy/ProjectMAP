@@ -1,26 +1,52 @@
-package com.example.projectmap // <-- PASTIKAN NAMA PACKAGE INI SESUAI DENGAN PROYEK ANDA
+package com.example.projectmap
 
-import android.content.Intent
-import android.os.Bundle
-import android.view.Menu
-import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
+import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
+import android.widget.EditText
+import android.widget.ImageButton
+import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 
 class MainActivity : AppCompatActivity() {
+
+    private lateinit var productAdapter: ProductAdapter
+    private lateinit var rvProducts: RecyclerView
+    private lateinit var etSearch: EditText
+    private lateinit var cartButton: ImageButton
+
+    private val originalProductList = mutableListOf<Product>()
+    private val filteredProductList = mutableListOf<Product>()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        setSupportActionBar(findViewById(R.id.toolbar_main))
+        // Setup Toolbar
+        val toolbar: androidx.appcompat.widget.Toolbar = findViewById(R.id.toolbar_main)
+        setSupportActionBar(toolbar)
+        supportActionBar?.title = ""
 
-        val rvProducts: RecyclerView = findViewById(R.id.rv_products)
+        // Initialize views
+        etSearch = findViewById(R.id.et_search)
+        cartButton = findViewById(R.id.cart_button)
+        rvProducts = findViewById(R.id.rv_products)
+
+        // Setup RecyclerView
         rvProducts.layoutManager = LinearLayoutManager(this)
 
-        // MODIFIKASI BARU: Buat fungsi untuk menangani klik item
-        val itemClickListener: (Product) -> Unit = { product ->
-            val intent = Intent(this, DetailProductActivity::class.java).apply {
+        // Get product data
+        originalProductList.clear()
+        originalProductList.addAll(getDummyProductData())
+        filteredProductList.clear()
+        filteredProductList.addAll(originalProductList)
+
+        // Setup adapter
+        productAdapter = ProductAdapter(filteredProductList) { product ->
+            // Handle product click - navigate to detail
+            val intent = android.content.Intent(this, DetailProductActivity::class.java).apply {
                 putExtra("PRODUCT_ID", product.id)
                 putExtra("PRODUCT_NAME", product.name)
                 putExtra("PRODUCT_PRICE", product.price)
@@ -29,69 +55,101 @@ class MainActivity : AppCompatActivity() {
             }
             startActivity(intent)
         }
-
-        // MODIFIKASI BARU: Lewatkan itemClickListener ke ProductAdapter
-        val productAdapter = ProductAdapter(getDummyProductData(), itemClickListener)
         rvProducts.adapter = productAdapter
-    }
 
-    // === TAMBAHAN BARU UNTUK IKON TROLI DI TOOLBAR ===
-    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        menuInflater.inflate(R.menu.menu_main, menu)
-        return true
-    }
+        // Setup search functionality
+        setupSearch()
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        return when (item.itemId) {
-            R.id.action_cart -> {
-                val intent = Intent(this, CartActivity::class.java)
-                startActivity(intent)
-                true
-            }
-            else -> super.onOptionsItemSelected(item)
+        // Setup cart button
+        cartButton.setOnClickListener {
+            // Navigate to cart activity
+            val intent = android.content.Intent(this, CartActivity::class.java)
+            startActivity(intent)
+            Toast.makeText(this, "Membuka keranjang", Toast.LENGTH_SHORT).show()
         }
     }
-    // ==================================================
+
+    private fun setupSearch() {
+        etSearch.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+
+            override fun afterTextChanged(s: Editable?) {
+                filterProducts(s.toString())
+            }
+        })
+    }
+
+    private fun filterProducts(query: String) {
+        filteredProductList.clear()
+
+        if (query.isEmpty()) {
+            // Jika search kosong, tampilkan semua produk
+            filteredProductList.addAll(originalProductList)
+        } else {
+            // Filter produk berdasarkan nama (case insensitive)
+            val searchQuery = query.toLowerCase().trim()
+            for (product in originalProductList) {
+                if (product.name.toLowerCase().contains(searchQuery)) {
+                    filteredProductList.add(product)
+                }
+            }
+        }
+
+        // Update adapter
+        productAdapter.updateData(filteredProductList)
+
+        // Optional: Tampilkan pesan jika tidak ada hasil
+        if (filteredProductList.isEmpty() && query.isNotEmpty()) {
+            Toast.makeText(this, "Tidak ada produk dengan nama '$query'", Toast.LENGTH_SHORT).show()
+        }
+    }
 
     private fun getDummyProductData(): List<Product> {
-        val productList = mutableListOf<Product>()
-        productList.add(
+        return listOf(
             Product(
                 id = 1,
                 name = "Cangkul Baja Modern",
                 price = 150000.0,
-                description = "Cangkul baja super kuat dan anti karat, cocok untuk semua jenis tanah. Sangat ideal untuk pekerjaan di kebun dan lahan pertanian kecil.",
+                description = "Cangkul baja super kuat dan anti karat, cocok untuk semua jenis tanah.",
                 imageResId = R.drawable.cangkul_baja
-            )
-        )
-        productList.add(
+            ),
             Product(
                 id = 2,
                 name = "Traktor Mini Serbaguna",
                 price = 25000000.0,
-                description = "Traktor mini handal dan efisien untuk membajak sawah dan mengolah lahan. Dilengkapi fitur modern untuk kemudahan operasional.",
+                description = "Traktor mini handal dan efisien untuk membajak sawah dan mengolah lahan.",
                 imageResId = R.drawable.traktor_mini
-            )
-        )
-        productList.add(
+            ),
             Product(
                 id = 3,
                 name = "Semprotan Hama Elektrik",
                 price = 450000.0,
-                description = "Semprotan hama otomatis dengan baterai tahan lama dan kapasitas 16 liter. Memudahkan penyemprotan tanpa perlu memompa manual.",
+                description = "Semprotan hama otomatis dengan baterai tahan lama dan kapasitas 16 liter.",
                 imageResId = R.drawable.semprotan_hama
-            )
-        )
-        productList.add(
+            ),
             Product(
                 id = 4,
                 name = "Sekop Tangan Premium",
                 price = 75000.0,
-                description = "Sekop tangan dengan desain ergonomis, material kuat, dan nyaman digenggam. Cocok untuk menanam, menggali, dan membersihkan area kecil.",
+                description = "Sekop tangan dengan desain ergonomis, material kuat, dan nyaman digenggam.",
                 imageResId = R.drawable.sekop_tangan
+            ),
+            Product(
+                id = 5,
+                name = "Pupuk Organik Premium",
+                price = 50000.0,
+                description = "Pupuk organik alami untuk hasil panen melimpah.",
+                imageResId = R.drawable.pupuk_organik
+            ),
+            Product(
+                id = 6,
+                name = "Alat Tanam Benih Otomatis",
+                price = 1200000.0,
+                description = "Memudahkan penanaman benih dengan presisi tinggi.",
+                imageResId = R.drawable.alat_tanam
             )
         )
-
-        return productList
     }
 }
